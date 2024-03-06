@@ -7,8 +7,8 @@ import os
 import time
 import sys
 import logging
-#logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-#logging.getLogger().addHandler(logging.StreamHandler(stream=sys.stdout))
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+logging.getLogger().addHandler(logging.StreamHandler(stream=sys.stdout))
 import asyncio # needed for NeMo Guardrails
 import torch
 import chromadb
@@ -38,18 +38,12 @@ from nemoguardrails import LLMRails, RailsConfig
 from nemoguardrails.llm.helpers import get_llm_instance_wrapper  
 from nemoguardrails.llm.providers import register_llm_provider
 
-# Environment Variables and Keys
-#os.environ['HUGGINGFACEHUB_API_TOKEN'] = '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'
-os.environ['NGC_API_KEY'] = 'b2Myb3V0cGZsbnMyMnI5cDFmdW5obGJlOWc6MWYyYWNmMTMtYjNhYi00OGZlLTg0MDQtYmVlMmRhNTIzNjgy'
-#os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 # Define embedding model for the vectordb
-#embed_model_name = "thenlper/gte-large"
 embed_model_name = "sentence-transformers/all-MiniLM-L6-v2"
 embed_model = HuggingFaceEmbeddings(model_name=embed_model_name)
 
 # Load ChromaDB vectors from disk
-#collection_name = "bloodtests" # pdf bloodtests
 collection_name = "healthcare_dataset" # 100 medical records
 
 # Load ChromaDB vectors from disk
@@ -69,7 +63,6 @@ model_name = "NousResearch/Llama-2-7b-chat-hf" # Jordan Nanos likes this one
 #https://huggingface.co/BioMistral/BioMistral-7B
 #model_name = "BioMistral/BioMistral-7B" 
 
-# What is the difference between LlamaForCausalLM and AutoModelForCausalLM?
 #model = LlamaForCausalLM.from_pretrained(model_name) # this works too
 #tokenizer = LlamaTokenizer.from_pretrained(model_name) # this works too
 model = AutoModelForCausalLM.from_pretrained(model_name)
@@ -112,9 +105,9 @@ hfpipeline = HuggingFacePipeline(pipeline=pipeline, verbose=True)
 # Create NeMo Rails
 NeMoPipeline = get_llm_instance_wrapper(llm_instance=hfpipeline, llm_type="hf_pipeline_llama2")
 register_llm_provider("hf_pipeline_llama2", NeMoPipeline) 
-rails_config = RailsConfig.from_path("./config") # config.yml and topics.co
+rails_config = RailsConfig.from_path("./config") 
 
-# Do Voodoo here!
+
 initial_prompt_template = """
 [INST] <<SYS>>
 Instruction:  You are a helpful clinical AI assistant that can answer patient's questions about their medical records. 
@@ -154,7 +147,7 @@ def format_docs(docs):
 # "k": 2 selects the top 2 closest vectors
 # ensures the question remains unchanged
 rag_chain = (
-    {"context": langchain_chroma.as_retriever(search_kwargs={"k": 1}) | format_docs, "question": RunnablePassthrough()}
+    {"context": langchain_chroma.as_retriever(search_kwargs={"k": 2}) | format_docs, "question": RunnablePassthrough()}
     | prompt
     | hfpipeline
     | StrOutputParser() 
@@ -185,7 +178,6 @@ async def generate_text(prompt,temperature):
     print (Fore.RED + 'generated response ' + Fore.BLUE + str(generated))
     # the return order must match with the gradio interface output order
     return guarded, generated
-
 
 #############################
 # Create a Gradio interface #
