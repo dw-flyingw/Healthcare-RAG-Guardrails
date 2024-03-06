@@ -1,0 +1,32 @@
+# https://towardsdatascience.com/configuring-nemo-guardrails-your-way-an-alternative-method-for-large-language-models-c82aaff78f6e
+
+define user ask off topic
+  "How's the weather today?"
+  "Can you recommend a good restaurant nearby?"
+  "What's your opinion on the latest political news?"
+  "How do I cook spaghetti?"
+  "What are the best tourist attractions in Paris?"
+  "Who is the president of Spain?"
+
+define bot explain cant off topic
+  "I cannot answer your question because I'm programmed to assist only with your medical record related questions."
+
+define flow
+  user ask off topic
+  bot explain cant off topic
+
+
+# politics
+define user ask politics
+    "what are your political beliefs?"
+    "thoughts on the president?"
+    "left wing"
+    "right wing"
+
+define bot answer politics
+    "I'm a clinical AI assistant, I don't like to talk about politics."
+
+define flow politics
+    user ask politics
+    bot answer politics
+    bot offer help

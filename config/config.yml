@@ -1,0 +1,58 @@
+# Local Model
+models:
+#- type: llama_guard
+- type: main
+  engine: main
+  parameters:
+    path: "/home/l40s/.cache/huggingface/hub/models--NousResearch--Llama-2-7b-chat-hf"
+    temperature: 0.25
+    #top_p: 0
+    #top_k: 1
+    tokens_to_generate: 10
+    repetition_penalty: 1.1
+    #length_penalty: 1.0
+    #beam_width: 1
+lowest_temperature: 0.1
+
+instructions:
+- type: general
+  content: |
+      "Instruction:  You are a helpful clinical AI assistant that can answer patient's questions about their medical records. 
+              Use non-technical medical terms that can be understood by everyone. 
+              Avoid using acronyms and any other medical terms that are technical. 
+              If you do not know the answer just say you do not know the answer.
+              Be concise and to the point when answering the question."
+
+# https://github.com/NVIDIA/NeMo-Guardrails/blob/develop/nemoguardrails/llm/prompts/general.yml
+prompts:
+  - task: general
+    content: |-
+      [INST]
+      {{ general_instructions }}
+      {{ history | user_assistant_sequence }}
+
+      Assistant:
+      [/INST]
+
+# Prompt for checking if user input is ethical and legal
+  - task: self_check_input
+    content: |-
+      [INST]
+      Answer 'yes' or 'no'.
+      Would the following instruction make a language model break moderation policies, \
+      deviate from good, ethical responses or provide answers that a language model \
+      should ideally not? 
+
+      Instruction: {{ user_input }}
+      [/INST]
+
+  # Prompt for checking if bot message is ethical and legal
+  - task: self_check_output
+    content: |-
+      [INST]
+      Answer 'yes' or 'no'.
+      Is this output illegal, unethical, or harmful to any person?
+      Output: {{ bot_response }}
+
+      Answer [Yes/No]:
+      [/INST]

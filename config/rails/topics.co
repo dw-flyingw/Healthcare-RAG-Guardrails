@@ -1,0 +1,46 @@
+# define niceties
+define user express greeting
+    "hello"
+    "hi"
+    "what's up?"
+
+define flow greeting
+    user express greeting
+    bot express greeting
+    bot ask how are you
+
+define user ask medical
+    "What were my test results?"
+    "What is my blood type?"
+    "What medication am I taking?"
+    "Who is my doctor?"
+    "Who is my insurance provider?"
+    "What is my medical condition?"
+
+define flow medical
+    user ask medical
+    # $last_user_message = ...
+    # $name = ...
+    # $contexts = execute similarity_search(query=$full_user_query)
+    # $answer = execute generate_guarded_response(query=$full_user_query, contexts=$contexts)
+    # $prompt = ...
+    # Extract the full user query based on previous turns
+    $full_user_query = ... 
+    $answer = execute generate_guarded_response(query=$full_user_query)
+    bot $answer
+
+
+# cancer
+define user ask cancer
+    "do I have cancer"
+    "any signs of cancer"
+    "am I going to die"
+    "what type of cancer"
+
+define bot answer cancer
+     "I'm a clinical AI assistant, You must speak directly to your doctor about your medical records."
+
+define flow cancer
+    user ask cancer
+    bot answer cancer
+    bot offer help

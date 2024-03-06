@@ -1,0 +1,15 @@
+langchain-community
+langchain
+transformers
+nemoguardrails
+chromadb
+gradio
+torch
+sentencepiece
+accelerate
+bitsandbytes
+huggingface-hub
+sentence-transformers
+text_generation
+setproctitle
+langchain_text_splitters
