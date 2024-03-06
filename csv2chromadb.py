@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-# run in /home/l40s/dave/healthcare on l40s@10.14.56.23
 # conda activate dave-nemo-env
 
+import os
 from colorama import Fore, Style, init
 init(autoreset=True) 
 import pandas as pd
@@ -19,6 +19,11 @@ embed_model = HuggingFaceEmbeddings(model_name=embed_model_name)
 csv_dataset = "./datasets/healthcare_dataset-100.csv"
 collection_name = "healthcare_dataset"
 chromadb_path = "./chromadb"
+
+# Check if the folder exists
+if not os.path.exists(chromadb_path):
+    os.makedirs(chromadb_path)
+    print(f"created folder: {chromadb_path}")
 
 # Create a persistent ChromaDB client
 chroma_client = PersistentClient(path=chromadb_path)
