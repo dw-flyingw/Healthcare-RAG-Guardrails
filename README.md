@@ -20,12 +20,12 @@ pip install -r requirements.txt
 
 ## 
 
-* <b>NeMo Guardrails:</b> Safety framework for LLMs, ensuring adherence to guidelines and reducing bias/toxicity.
-* <b>LangChain:</b> Framework for building language-based applications, streamlining model retrieval and combination.
-* <b>ChromaDB:</b> Vector database for efficient text search and retrieval. 
-* <b>Hugging Face Pipelines:</b> Streamlined model loading and execution. 
-* <b>Llama-2 7B LLM:</b> Large language model employed for text generation.
-* <b>Gradio:</b> Interface library for web-based interaction with the model. 
+* __NeMo Guardrails:__ Safety framework for LLMs, ensuring adherence to guidelines and reducing bias/toxicity.
+* __LangChain:__ Framework for building language-based applications, streamlining model retrieval and combination.
+* __ChromaDB:__ Vector database for efficient text search and retrieval. 
+* __Hugging Face Pipelines:__ Streamlined model loading and execution. 
+* __Llama-2 7B LLM:__ Large language model employed for text generation.
+* __Gradio:__ Interface library for web-based interaction with the model. 
 
 
 
