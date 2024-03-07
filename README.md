@@ -3,7 +3,7 @@
 > [!IMPORTANT]
 > This is currently a work in progress, expect things to be broken!
 
-Demonstrate NeMo Guardrails on a locally running Llama-2-7b model with 100 medical records in a ChromaDB vector embeddings database.
+Demonstrate NeMo Guardrails on a locally running Llama-2-7b model with 100 medical records in a ChromaDB vector database.
 
 Tested on HPE DL380, AMD CPU and Nvidia L40S GPU
 
