@@ -16,7 +16,7 @@ import transformers
 import gradio as gr
 import setproctitle # Friendly name for nvidia-smi GPU Memory Usage
 setproctitle.setproctitle('Healthcare RAG Guardrails')
-#output readability
+# Output Readability
 from colorama import Fore, init
 init(autoreset=True) 
 from transformers import AutoTokenizer, LlamaTokenizer, LlamaForCausalLM, AutoModelForCausalLM
@@ -26,7 +26,7 @@ from langchain_community.llms.huggingface_pipeline import HuggingFacePipeline
 from langchain_community.vectorstores import Chroma
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
-from langchain.prompts import PromptTemplate
+
 
 # Hugging Face Optimize for NVIDIA
 # from optimum.nvidia import AutoModelForCausalLM 
@@ -57,10 +57,11 @@ langchain_chroma = Chroma(
 
 ###### Select Models
 #https://huggingface.co/NousResearch/Llama-2-7b-chat-hf
-model_name = "NousResearch/Llama-2-7b-chat-hf" # Jordan Nanos likes this one
+model_name = "NousResearch/Llama-2-7b-chat-hf" 
 
-#model = LlamaForCausalLM.from_pretrained(model_name) # this works too
-#tokenizer = LlamaTokenizer.from_pretrained(model_name) # this works too
+#model = LlamaForCausalLM.from_pretrained(model_name) 
+#tokenizer = LlamaTokenizer.from_pretrained(model_name) 
+
 model = AutoModelForCausalLM.from_pretrained(model_name)
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 
@@ -147,7 +148,6 @@ rag_chain = (
     | StrOutputParser() 
 )
 
-
 async def generate_guarded_response(query):
     response = rag_chain.invoke(query) 
     print (Fore.GREEN + 'generate_guarded_response query ' + Fore.BLUE + str(query))
@@ -157,7 +157,6 @@ async def generate_guarded_response(query):
 # Register async functions for use in rails
 rag_rails = LLMRails(config=rails_config, llm=hfpipeline)
 rag_rails.register_action(action=generate_guarded_response, name="generate_guarded_response")
-
 
 # Gradio function upon submit
 async def generate_text(prompt,temperature):
@@ -173,7 +172,6 @@ async def generate_text(prompt,temperature):
     print (Fore.RED + 'generated response ' + Fore.BLUE + str(generated))
     # the return order must match with the gradio interface output order
     return guarded, generated
-
 
 # Create a Gradio interface 
 title = "Retrieval Augmented Generation with Nvidia NeMo Guardrails"
