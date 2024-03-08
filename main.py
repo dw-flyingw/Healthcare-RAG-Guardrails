@@ -7,8 +7,8 @@ import os
 import time
 import sys
 import logging
-logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-logging.getLogger().addHandler(logging.StreamHandler(stream=sys.stdout))
+#logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+#logging.getLogger().addHandler(logging.StreamHandler(stream=sys.stdout))
 import asyncio # needed for NeMo Guardrails
 import torch
 import chromadb
@@ -30,6 +30,7 @@ from langchain.prompts import PromptTemplate
 
 # Hugging Face Optimize for NVIDIA
 # from optimum.nvidia import AutoModelForCausalLM 
+# https://huggingface.co/blog/optimum-nvidia
 # https://github.com/huggingface/optimum-nvidia
 # cant use just yet only in docker container or source and source can't be built on this box at the moment
 
@@ -37,7 +38,6 @@ from langchain.prompts import PromptTemplate
 from nemoguardrails import LLMRails, RailsConfig
 from nemoguardrails.llm.helpers import get_llm_instance_wrapper  
 from nemoguardrails.llm.providers import register_llm_provider
-
 
 # Define embedding model for the vectordb
 embed_model_name = "sentence-transformers/all-MiniLM-L6-v2"
@@ -58,10 +58,6 @@ langchain_chroma = Chroma(
 ###### Select Models
 #https://huggingface.co/NousResearch/Llama-2-7b-chat-hf
 model_name = "NousResearch/Llama-2-7b-chat-hf" # Jordan Nanos likes this one
-
-#waiting for chat-hf version of this model
-#https://huggingface.co/BioMistral/BioMistral-7B
-#model_name = "BioMistral/BioMistral-7B" 
 
 #model = LlamaForCausalLM.from_pretrained(model_name) # this works too
 #tokenizer = LlamaTokenizer.from_pretrained(model_name) # this works too
@@ -137,10 +133,8 @@ prompt = PromptTemplate(
     template=initial_prompt_template,
 )
 
-# Ask Alejandro why do we need to put newlines around each thing?
 def format_docs(docs):
     return "\n\n".join([d.page_content for d in docs])
-
 
 # Create llm rag chain
 # need to understand RnnablePassthrough and StrOutParser really works and what is the | format
@@ -162,9 +156,10 @@ async def generate_guarded_response(query):
 
 # Register async functions for use in rails
 rag_rails = LLMRails(config=rails_config, llm=hfpipeline)
-#rag_rails.register_action(action=similarity_search, name="similarity_search")
 rag_rails.register_action(action=generate_guarded_response, name="generate_guarded_response")
 
+
+# Gradio function upon submit
 async def generate_text(prompt,temperature):
     # Use temperature value from gradio slider
     hfpipeline.pipeline.temperature = temperature 
@@ -179,10 +174,8 @@ async def generate_text(prompt,temperature):
     # the return order must match with the gradio interface output order
     return guarded, generated
 
-#############################
-# Create a Gradio interface #
-#############################
 
+# Create a Gradio interface 
 title = "Retrieval Augmented Generation with Nvidia NeMo Guardrails"
 description = f"model = {model_name} <br>  \
                nemo guardrail engine = {model_name} <br> \
@@ -216,9 +209,7 @@ demo = gr.Interface(
                             ],
                     article=article, # HTML to display under the Example prompt buttons
                     # removes default gradio footer
-                    css="""
-                        footer{display:none !important} 
-                        """
+                    css="footer{display:none !important}"
                    )
 
 # this binds to all interfaces which is needed for proxy forwarding

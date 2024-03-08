@@ -23,7 +23,6 @@ define flow medical
     $answer = execute generate_guarded_response(query=$full_user_query)
     bot $answer
 
-
 # cancer
 define user ask cancer
     "do I have cancer"
