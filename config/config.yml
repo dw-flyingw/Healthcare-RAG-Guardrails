@@ -1,20 +1,3 @@
-# Local Model
-models:
-#- type: llama_guard or main
-- type: main
-  engine: main
-  parameters:
-    #change path to local hub 
-    path: "/home/l40s/.cache/huggingface/hub/models--NousResearch--Llama-2-7b-chat-hf"
-    temperature: 0.25
-    #top_p: 0
-    #top_k: 1
-    tokens_to_generate: 10
-    repetition_penalty: 1.1
-    #length_penalty: 1.0
-    #beam_width: 1
-lowest_temperature: 0.1
-
 instructions:
 - type: general
   content: |

@@ -12,8 +12,6 @@ huggingface-cli download NousResearch/Llama-2-7b-chat-hf
 
 huggingface-cli download sentence-transformers/all-MiniLM-L6-v2 
 
-edit config/config.yml to replace with your path to the model 
-
 conda create nemo-env 
 
 conda activate nemo-env

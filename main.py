@@ -7,26 +7,25 @@ import os
 import time
 import sys
 import logging
-#logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-#logging.getLogger().addHandler(logging.StreamHandler(stream=sys.stdout))
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+logging.getLogger().addHandler(logging.StreamHandler(stream=sys.stdout))
 import asyncio # needed for NeMo Guardrails
 import torch
 import chromadb
 import transformers
 import gradio as gr
 import setproctitle # Friendly name for nvidia-smi GPU Memory Usage
-setproctitle.setproctitle('Healthcare RAG Guardrails')
+setproctitle.setproctitle('PDF RAG Guardrails')
 # Output Readability
 from colorama import Fore, init
 init(autoreset=True) 
-from transformers import AutoTokenizer, LlamaTokenizer, LlamaForCausalLM, AutoModelForCausalLM
+from transformers import AutoTokenizer, AutoModelForCausalLM
 from langchain.prompts import PromptTemplate
 from langchain.embeddings.huggingface import HuggingFaceEmbeddings
 from langchain_community.llms.huggingface_pipeline import HuggingFacePipeline
 from langchain_community.vectorstores import Chroma
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
-
 
 # Hugging Face Optimize for NVIDIA
 # from optimum.nvidia import AutoModelForCausalLM 
@@ -55,15 +54,6 @@ langchain_chroma = Chroma(
     embedding_function=embed_model
 )
 
-###### Select Models
-#https://huggingface.co/NousResearch/Llama-2-7b-chat-hf
-model_name = "NousResearch/Llama-2-7b-chat-hf" 
-
-#model = LlamaForCausalLM.from_pretrained(model_name) 
-#tokenizer = LlamaTokenizer.from_pretrained(model_name) 
-
-model = AutoModelForCausalLM.from_pretrained(model_name)
-tokenizer = AutoTokenizer.from_pretrained(model_name)
 
 # GPU settings
 #n_gpu_layers = 0 # for CPU
@@ -76,15 +66,23 @@ max_tokens = 150 # this can slow down the response time
 top_p = 0.95
 top_k = 2 # is this not the same as "k": 2 in rag_chain?
 context_window = 4096  # max is 4096
-repeat_penalty = 1.1 # why is this not like maybe 10
+repetition_penalty = 1.1 # why is this not like maybe 10
 seed = 22 # For reproducibility
+
+
+###### Select Models
+#https://huggingface.co/NousResearch/Llama-2-7b-chat-hf
+model_id = "NousResearch/Llama-2-7b-chat-hf" 
+#model = AutoModelForCausalLM.from_pretrained(model_id, trust_remote_code=True, temperature=temperature)
+model = AutoModelForCausalLM.from_pretrained(model_id)
+tokenizer = AutoTokenizer.from_pretrained(model_id)
+
 
 # put the model into a pipeline
 pipeline = transformers.pipeline("text-generation", 
                                  model = model,
                                  tokenizer = tokenizer,                                 
-                                 torch_dtype = torch.float16, 
-                                 #device = "cpu", 
+                                 torch_dtype = torch.bfloat16, 
                                  device = torch.device('cuda'), 
                                  max_new_tokens=max_tokens,
                                  temperature=temperature,
@@ -92,6 +90,7 @@ pipeline = transformers.pipeline("text-generation",
                                  return_full_text=True,
                                  top_k=top_k,
                                  top_p=top_p,
+                                 trust_remote_code=True
                                  #use_fp8=True, # Hugging Face Optimize for NVIDIA
                                  )
 
@@ -162,11 +161,14 @@ rag_rails.register_action(action=generate_guarded_response, name="generate_guard
 async def generate_text(prompt,temperature):
     # Use temperature value from gradio slider
     hfpipeline.pipeline.temperature = temperature 
+    
     print (Fore.RED + 'prompt ' + Fore.BLUE + str(prompt))
 
     guarded = await rag_rails.generate_async(prompt) # pass it through  NeMo Guardrails
     generated = rag_chain.invoke(prompt) # unguarded generated response 
-   
+    
+    #print (Fore.GREEN + str(hfpipeline.pipeline))
+
     print (Fore.RED + 'hfpipeline temperature ' + Fore.BLUE + str(hfpipeline.pipeline.temperature))
     print (Fore.RED + 'guarded response ' + Fore.BLUE + str(guarded)) 
     print (Fore.RED + 'generated response ' + Fore.BLUE + str(generated))
@@ -175,8 +177,7 @@ async def generate_text(prompt,temperature):
 
 # Create a Gradio interface 
 title = "Retrieval Augmented Generation with Nvidia NeMo Guardrails"
-description = f"model = {model_name} <br>  \
-               nemo guardrail engine = {model_name} <br> \
+description = f"model = {model_id} <br>  \
                embedings = {embed_model_name} <br> \
                chromadb = 100 record {collection_name}"       
 article = " <p>\
@@ -201,8 +202,9 @@ demo = gr.Interface(
                               ["I am Michael Bradshaw, where do I have healthcare insurance?"], 
                               ["I am Amanda Ortiz, who is my doctor?"],
                               ["I am Amy Roberts, do I have cancer? "],
+                              ["I am Brian Dorsey, do I have Leukemia? "],
                               ["What are your political beliefs?"],
-                              ["How do I cook spaghetti?"],
+                              ["How to make lemonade?"],
                               ["How can I make a ghost gun?"],
                             ],
                     article=article, # HTML to display under the Example prompt buttons
