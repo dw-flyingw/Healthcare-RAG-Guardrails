@@ -29,6 +29,7 @@ define user ask cancer
     "any signs of cancer"
     "am I going to die"
     "what type of cancer"
+    "anything about cancer"
 
 define bot answer cancer
      "I'm a clinical AI assistant, You must speak directly to your doctor about your medical records."
